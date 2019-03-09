@@ -34,7 +34,7 @@ this.system = this.system || {};
         this._text.text = text;
     };
 
-    p.setTextposition = function(x, y) {
+    p.setTextPosition = function(x, y) {
         this._text.x = x;
         this._text.y = y;
     };

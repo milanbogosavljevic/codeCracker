@@ -3,12 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <link href="https://fonts.googleapis.com/css?family=Russo+One" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <script src="https://code.createjs.com/1.0.0/createjs.min.js"></script>
     <script src="js/common/SoundManager.js"></script>
     <script src="js/common/CustomMethods.js"></script>
     <script src="js/common/Button.js"></script>
+    <script src="js/EnterCombinationComponent.js"></script>
+    <script src="js/CombinationRow.js"></script>
+    <script src="js/PlayerCombinationsComponent.js"></script>
+    <script src="js/ShowWinComponent.js"></script>
+    <script src="js/ShowWinCombinationComponent.js"></script>
+    <script src="js/PlayerStatsComponent.js"></script>
     <script src="js/CodeCrackerGame.js"></script>
     <script>
 
@@ -22,68 +27,113 @@
         let preloaderMask;
 
         function init(){
-            stage = new createjs.StageGL("gameStage");
+            stage = new createjs.Stage("gameStage");
             queue = new createjs.LoadQueue(false);
             createjs.Sound.alternateExtensions = ["mp3"];
             queue.installPlugin(createjs.Sound);
-            loadPreloadImages();
+            //loadPreloadImages();
+            loadFontManifest();
+        }
+
+        function loadFonts(config) {
+            console.log('load fonts');
+            const loader = new createjs.FontLoader(config, true);
+            loader.on("complete", loadPreloadImages);
+            loader.load();
+        }
+
+        function loadFontManifest() {
+            loadFonts({
+                src: ['fonts/AVENGEANCE.ttf'],
+                type: "font"
+            });
+            return false;
         }
 
         function loadPreloadImages() {
-            console.log('load preload');
+            console.log('load preload images');
             queue.on("complete", setPreloadImages);
             queue.on("progress", ()=>{console.log('progress')});
             queue.loadManifest([
-                {id: "preloaderImage", src:"assets/preloader.jpg"},
+                {id: "preloaderImage", src:"assets/preloader.png"},
                 {id: "preloaderMask", src:"assets/preloaderMask.jpg"}
             ]);
         }
 
         function setPreloadImages(e) {
             e.remove();
-            console.log('set preload');
+            console.log('set preload images');
             let background = new createjs.Shape();
             background.graphics.beginFill("black").drawRect(0,0,1920,1080);
             background.cache(0,0,1920,1080);
 
             preloaderImage = system.CustomMethods.makeImage('preloaderImage', false);
-            preloaderImage.x = 460;
+            preloaderImage.x = 530;
             preloaderImage.y = 395;
 
             preloaderMask = system.CustomMethods.makeImage('preloaderMask', false);
             preloaderMask.rotation = 180;
-            preloaderMask.x = preloaderImage.x + 1000;
-            preloaderMask.y = preloaderImage.y + 290;
+            preloaderMask.x = preloaderImage.x + 857;
+            preloaderMask.y = preloaderImage.y + 236;
 
-            percentLoaded = system.CustomMethods.makeText("0" , "90px Russo One" , "white", 'right', 'middle');
-            percentLoaded.x = 1100;
+            percentLoaded = system.CustomMethods.makeText("0" , "90px Avengeance" , "white", 'center', 'middle');
+            percentLoaded.x = 1920/2;
             percentLoaded.y = 750;
-            system.CustomMethods.cacheText(percentLoaded);
 
             stage.addChild(background, preloaderImage, preloaderMask, percentLoaded);
             startAssetsLoading();
         }
 
         function startAssetsLoading() {
+            console.log('start assets loading');
             queue.removeAllEventListeners();
             queue.on("complete", loadComplete);
             queue.on("progress", handleProgress);
             queue.loadManifest([
-                {id: "background", src:"assets/background.jpg"}
+                {id: "background", src:"assets/background.jpg"},
+                {id: "info", src:"assets/info.png"},
+                {id: "enterButton", src:"assets/enterButton.png"},
+                {id: "deleteButton", src:"assets/deleteButton.png"},
+                {id: "newGameButton", src:"assets/newGameButton.png"},
+                {id: "soundButton", src:"assets/soundButton.png"},
+                {id: "infoButton", src:"assets/infoButton.png"},
+                {id: "fullScreenButton", src:"assets/fullScreenButton.png"},
+                {id: "symbol0", src:"assets/symbol0.png"},
+                {id: "symbol1", src:"assets/symbol1.png"},
+                {id: "symbol2", src:"assets/symbol2.png"},
+                {id: "symbol3", src:"assets/symbol3.png"},
+                {id: "symbol4", src:"assets/symbol4.png"},
+                {id: "symbol5", src:"assets/symbol5.png"},
+                {id: "ps0", src:"assets/ps0.png"},
+                {id: "ps1", src:"assets/ps1.png"},
+                {id: "ps2", src:"assets/ps2.png"},
+                {id: "ps3", src:"assets/ps3.png"},
+                {id: "ps4", src:"assets/ps4.png"},
+                {id: "ps5", src:"assets/ps5.png"},
+                {id: "dotGreen", src:"assets/dotGreen.png"},
+                {id: "dotYellow", src:"assets/dotYellow.png"},
+                {id: "showWinUp", src:"assets/showWinUp.png"},
+                {id: "showWinDown", src:"assets/showWinDown.png"},
+                {id: "goldenBar", src:"assets/goldenBar.png"},
+                {id: "showCodeLeft", src:"assets/showCodeLeft.png"},
+                {id: "showCodeRight", src:"assets/showCodeRight.png"},
+                {id: "newGameSound", src:"sounds/newGameSound.ogg"},
+                {id: "winSound", src:"sounds/winSound.ogg"},
+                {id: "clickSound", src:"sounds/clickSound.ogg"},
+                {id: "backgroundMusic", src:"sounds/backgroundMusic.ogg"}
             ]);
         }
 
         function handleProgress(event){
             const percent = Math.round(event.progress* 100);
             const scalePercent = (100 - percent)/100;
-            percentLoaded.uncache();
-            percentLoaded.text = percent + " %";
-            system.CustomMethods.cacheText(percentLoaded);
+            percentLoaded.text = percent;
             preloaderMask.scaleX = scalePercent;
             stage.update();
         }
 
         function loadComplete() {
+            //return;
             stage.removeAllChildren();
             game = new system.CodeCrackerGame();
             stage.addChild(game);

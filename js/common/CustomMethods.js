@@ -15,7 +15,6 @@ this.system = this.system || {};
     };
 
     CustomMethods.cacheText = function(text) {
-        console.log('cache');
         const align = text.textAlign;
         const baseline = text.textBaseline;
         const cacheWidth = text.getBounds().width;
