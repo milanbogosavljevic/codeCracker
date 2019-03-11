@@ -49,7 +49,7 @@ this.system = this.system || {};
 
     p._clearDots = function() {
         this._dots.forEach((dot)=>{
-            dot.visible = false;
+            dot.alpha = 0;
         });
     };
 
@@ -64,7 +64,8 @@ this.system = this.system || {};
                 imgName = 'dotYellow';
             }
             system.CustomMethods.swapImages(this._dots[i], imgName);
-            this._dots[i].visible = true;
+            let waitTime = i * 200;
+            createjs.Tween.get(this._dots[i]).wait(waitTime).to({alpha:1},100, createjs.Ease.quadIn);
         }
     };
 
